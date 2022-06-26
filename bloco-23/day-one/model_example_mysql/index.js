@@ -5,6 +5,9 @@ const { get } = require('express/lib/response');
 const Author = require('./models/author'); // importa model da tabela Author
 const Books = require('./models/book');
 const app = express(); // inicializa o express em app 
+const bodyParser = require('body-parser'); // importa o body parser depois de instalá-lo para converter o body no método POST para ser enviado para o servidor;
+
+app.use(bodyParser.json()); // usa o body parser na aplicação
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
@@ -29,12 +32,12 @@ app.get('/books', async (req, res) => {
             const allBooks = await Books.getAllBooks();
             return res.status(200).json(allBooks);
         }
-        const someBooks = await Books.getBooksById(authorID);
+        const someBooks = await Books.getBooksByAuthorId(authorID);
         return res.status(200).json(someBooks);
 
         // mais enxuto:
 /*         const books = (authorID) ? 
-          await Books.getBooksById(authorID) :  se for true
+          await Books.getBooksByAuthorId(authorID) :  se for true
           await await Books.getAllBooks();      se for false
         return res.status(200).json.apply(books); */
     } 
@@ -56,11 +59,28 @@ app.get('/books/search', async (req, res) => {
 });
 
 app.get('/authors/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const author = await Author.getAuthorById(id);
-        (author) ? res.status(200).json(author) : res.status(404).json({ message: 'Author not found!' });
-    } catch(e) {
-        return res.status(400).json({ message: e});
-    }
-});
+    const { id } = req.params;
+  
+    const author = await Author.getAuthorById(Number(id));
+  
+    if (!author) return res.status(404).json({ message: 'Not found' });
+  
+    res.status(200).json(author);
+  });
+
+  app.get('/books/:id', async (req, res) => {
+    const { id } = req.params;
+    const book = await Books.getBookById(Number(id));
+    if (!book) return res.status(404).json({ message: 'Book not found'});
+
+    res.status(200).json(book);
+  });
+
+  app.post('/authors', async (req, res) => {
+      const { firstName, middleName, lastName } = req.body;
+      if (Author.isNameValid(firstName, middleName, lastName)) {
+          Author.createAuthor(firstName, middleName, lastName);
+          return res.status(200).json({ message: 'Autor adicionado!'});
+      }
+       return res.status(400).json({ message: 'Opa, algo deu errado!'});
+  })
