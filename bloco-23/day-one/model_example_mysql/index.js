@@ -2,8 +2,8 @@
 
 const express = require('express');
 const { get } = require('express/lib/response');
-const Author = require('./models/author'); // importa model da tabela Author
-const Books = require('./models/book');
+const Books = require('./models/Books');
+const controllerAuthors = require('./controllers/Authors');
 const app = express(); // inicializa o express em app 
 const bodyParser = require('body-parser'); // importa o body parser depois de instalá-lo para converter o body no método POST para ser enviado para o servidor;
 
@@ -14,15 +14,7 @@ app.listen(PORT, () => {
     console.log(`Ouvindo na porta ${PORT}`);
 });
 
-app.get('/authors', async (_req, res) => {
-    try {
-        const authors = await Author.getAllAuthors();
-        res.status(200).json(authors);
-    } catch(e) {
-        return res.status(400).json({ message: e});
-    }
-    
-});
+app.get('/authors', controllerAuthors.getAll);
 
 // essa rota pode retornar todos os livros ou somente os livros que contenham o authorId fornecido na query
 app.get('/books', async (req, res) => {
