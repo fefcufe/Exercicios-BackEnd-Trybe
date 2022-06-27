@@ -14,7 +14,7 @@ const getAllBooks = async () => {
     }));
 }
 
-const getBooksById = async (authorId) => {
+const getBooksByAuthorId = async (authorId) => {
     const query = 'SELECT * FROM model_example.books WHERE author_id=?;'; // onde tem "?" na query é substituido pelo parametro depois da virgula no método query
     const [book] = await connection.query(query, [authorId]);
 
@@ -23,8 +23,21 @@ const getBooksById = async (authorId) => {
         title,
         authorID: author_id,
     }));
+};
+
+const getBookById = async (bookId) => {
+    const query = 'SELECT id, title FROM model_example.books WHERE id = ?;';
+    const [book] = await connection.query(query, [bookId]);
+    
+    if (book.length === 0) return null;
+
+    return book.map(({ id, title }) => ({
+        id,
+        title
+    }))[0];
 }
 module.exports = {
     getAllBooks,
-    getBooksById,
+    getBooksByAuthorId,
+    getBookById,
 }
