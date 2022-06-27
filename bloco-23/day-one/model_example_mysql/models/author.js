@@ -24,6 +24,7 @@ const getFullName = ({id, firstName, middleName, lastName}) => { // coloca o par
 }
 // a funcao getFullName é mais uma funcao de tratamento de dados
 
+// método para obter todos os autores 
 const getAllAuthors = async () => {
     const [authors] = await connection.query(
         'SELECT id, first_name, middle_name, last_name FROM model_example.authors'
@@ -32,23 +33,49 @@ const getAllAuthors = async () => {
     return authors.map(serialize).map(getFullName); // já com os dados tratados
 }
 
+// método para obter autor passando a id
 const getAuthorById = async (id) => {
-    const query = 'SELECT * FROM model_example.authors WHERE id=?;';
-    const [author] = await connection.query(query, [id]);
-    (author.length === 0) ? null : author.map(({ id, first_name, middle_name, last_name}) => ({
+    const query = `
+      SELECT id, first_name, middle_name, last_name 
+      FROM model_example.authors 
+      WHERE id = ?
+    `;
+  
+    const [authorData] = await connection.query(query, [id]);
+  
+    if (authorData.length === 0) return null;
+    const { firstName, middleName, lastName } = authorData.map(serialize)[0];
+    return ({
         id,
-        firstName: first_name,
-        middleName: middle_name,
-        lastName: last_name,
-    }))[0]; // não esquecer de colocar o index do elemento que deve ser retornado, ainda que seja uma lista de um elemento só  
+        firstName,
+        middleName,
+        lastName,
+    });
+  }; 
 
-    
-    
-};
+  // validação de novos autores
+  const isNameValid = (firstName, middleName, lastName) => {
+    if (!firstName || typeof firstName !== 'string') return false;
+	if (!lastName || typeof lastName !== 'string') return false;
+	if (middleName && typeof middleName !== 'string') return false;
+
+	return true;
+  }
+  // método para inserir autores 
+  
+  const createAuthor = async (firstName, middleName, lastName) => 
+    await connection.query(`INSERT INTO model_example.authors (first_name, middle_name, last_name)
+     VALUES (?,?,?)`, [firstName, middleName, lastName]);
+
+  // ou serialize(author)[0]
+ // não esquecer de colocar o index do elemento que deve ser retornado, ainda que seja uma lista de um elemento só  
+ 
 
 module.exports = {
     getAllAuthors,
     serialize,
     getFullName,
     getAuthorById,
+    createAuthor,
+    isNameValid,
 };
