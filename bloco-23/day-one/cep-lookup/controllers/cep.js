@@ -1,16 +1,14 @@
-const rescue = require('express-rescue');
 const cepServices = require('../services/cep');
 
-const getAddressByCep = rescue(async (req, res, next) => {
-  const { cep } = req.params;
-  const address = await cepServices.findAdressByCep(cep);
-
-  if (address.error) {
-    return next(address.error);
+const getAddressByCep = async (req, res, next) => {
+  try {
+    const { cep } = req.params;
+    const address = await cepServices.findAdressByCep(cep);
+    return res.status(200).json(address);
+  } catch (e) {
+    return next(e);
   }
-
-  return res.status(200).json(address);
-});
+};
 
 module.exports = {
   getAddressByCep,
