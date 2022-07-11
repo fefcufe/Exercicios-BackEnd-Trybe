@@ -16,6 +16,13 @@ app.get('/drinks', (req, res) => {
     res.json(orderedList);
 })
 
+app.get('/drinks/:id', (req, res) => {
+	const { id } = req.params;
+	const drink = drinks.find((eachDrink) => eachDrink.id === Number(id));
+	if (!drink) return res.status(404).json({ message: 'Recipe not found!'});
+	res.status(200).json(drink);
+})
+
 app.listen(3001, () => {
     console.log('estou ouvindo na porta 3001');
 });
