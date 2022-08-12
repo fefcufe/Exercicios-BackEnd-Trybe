@@ -3,17 +3,16 @@
 // - 4 notas de prova
 // - 2 notas de trabalho
 
-export default class Student {
-  private _enrollment: string;
-  private _name: string;
-  private _examsGrades: number[];
-  private _worksGrades: number[];
+import Person from './person';
 
-  constructor(enrollment: string, name: string) {
-    this._enrollment = enrollment;
-    this._name = name;
-    this._examsGrades = [];
-    this._worksGrades = [];
+export default class Student extends Person {
+  private _enrollment: string;
+  private _examsGrades: number[] = [];
+  private _worksGrades: number[] = [];
+
+  constructor(name: string, birthDate: Date) {
+    super(name, birthDate);
+    this._enrollment = this.generateEnrollment();
   }
 
   get enrollment(): string {
@@ -24,27 +23,12 @@ export default class Student {
     this._enrollment = value;
   }
 
-  get name(): string {
-    return this._name;
-  }
-
-  set name(value: string) {
-    if (value.length < 3) {
-      throw new Error('O nome deve conter no mínimo 3 caracteres.');
-    }
-
-    this._name = value;
-  }
-
   get examsGrades(): number[] {
     return this._examsGrades;
   }
 
   set examsGrades(value: number[]) {
-    if (value.length > 4) {
-      throw new Error('A pessoa estudante só pode possuir 4 notas de provas.');
-    }
-
+    this.validateExamsGrades(value);
     this._examsGrades = value;
   }
 
@@ -53,12 +37,7 @@ export default class Student {
   }
 
   set worksGrades(value: number[]) {
-    if (value.length > 2) {
-      throw new Error(
-        'A pessoa estudante só pode possuir 2 notas de trabalhos.',
-      );
-    }
-
+    this.validateWorksGrades(value);
     this._worksGrades = value;
   }
 
@@ -76,5 +55,25 @@ export default class Student {
     const divider = this.examsGrades.length + this.worksGrades.length;
 
     return Math.round(sumGrades / divider);
+  }
+
+  generateEnrollment() : string {
+    const random = String(Date.now() * (Math.random() + 1)).replace(/\W/g, '');
+    if (random.length > 16) {
+      throw new Error('Matrícula não pode ter mais do que 16 caracteres');
+    }
+    return `STU${random}`;
+  }
+
+  private validateExamsGrades(exams: number[]) : void {
+    if (exams.length > 4) {
+      throw new Error('Estudante pode ter no máximo 4 notas de exames');
+    }
+  }
+
+  private validateWorksGrades(works : number[]) : void {
+    if (works.length > 2) {
+      throw new Error('Estudante pode ter no máximo 2 notas de trabalhos');
+    }
   }
 }
